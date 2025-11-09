@@ -1,0 +1,5 @@
+# Keep sensitive config private
+config.js
+
+# OS files
+.DS_Store
