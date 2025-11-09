@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Preferences</title>
+    <script src="config.js"></script>
+    <script src="github-sync.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .user-info .name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+        }
+
+        .checkbox-item.selected {
+            background: #e6f2ff;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+            color: #2d3748;
+        }
+
+        .text-input-section {
+            margin-top: 20px;
+        }
+
+        .text-input-section label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .text-input-section textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .text-input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: grid;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .save-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-button {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #f7fafc;
+        }
+
+        .success-message {
+            padding: 15px;
+            background: #48bb78;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Food Preferences 🍽️</h1>
+        <p class="subtitle">Let us know about your dietary needs and preferences</p>
+
+        <div class="user-info">
+            <div class="name" id="userName"></div>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Your preferences have been saved!
+        </div>
+
+        <form id="foodForm">
+            <div class="form-section">
+                <h3>What Can You Bring?</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item" onclick="toggleCheckbox('appetizers')">
+                        <input type="checkbox" id="appetizers" name="contributions" value="appetizers">
+                        <label for="appetizers">Appetizers</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox('mainDish')">
+                        <input type="checkbox" id="mainDish" name="contributions" value="mainDish">
+                        <label for="mainDish">Main Dish</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox('sideDish')">
+                        <input type="checkbox" id="sideDish" name="contributions" value="sideDish">
+                        <label for="sideDish">Side Dish</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox('dessert')">
+                        <input type="checkbox" id="dessert" name="contributions" value="dessert">
+                        <label for="dessert">Dessert</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox('drinks')">
+                        <input type="checkbox" id="drinks" name="contributions" value="drinks">
+                        <label for="drinks">Drinks/Beverages</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-input-section">
+                <label for="additionalNotes">Additional Notes or Specific Items You'll Bring</label>
+                <textarea id="additionalNotes" placeholder="e.g., 'I'll bring my famous apple pie!' or 'Allergic to shellfish'"></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="save-button">Save Preferences</button>
+                <button type="button" class="back-button" onclick="window.location.href='menu.html'">Back to Menu</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const currentUser = localStorage.getItem('selectedUserName');
+
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('userName').textContent = currentUser;
+
+        // Initialize GitHub sync
+        const github = new GitHubSync(GITHUB_CONFIG);
+        let foodPreferences = {};
+        let currentSha = null;
+        const userKey = currentUser.toLowerCase();
+
+        // Load data from GitHub
+        async function loadData() {
+            const result = await github.fetchData();
+            foodPreferences = result.data.foodPreferences || {};
+            currentSha = result.sha;
+
+            if (foodPreferences[userKey]) {
+                const prefs = foodPreferences[userKey];
+
+                // Load contributions
+                if (prefs.contributions) {
+                    prefs.contributions.forEach(c => {
+                        const checkbox = document.getElementById(c);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            checkbox.parentElement.classList.add('selected');
+                        }
+                    });
+                }
+
+                // Load additional notes
+                if (prefs.notes) {
+                    document.getElementById('additionalNotes').value = prefs.notes;
+                }
+            }
+        }
+
+        // Save data to GitHub
+        async function saveData() {
+            const fullData = {
+                calendarSelections: (await github.fetchData()).data.calendarSelections || {},
+                foodPreferences: foodPreferences
+            };
+            currentSha = await github.saveData(fullData, currentSha);
+        }
+
+        // Load initial data
+        loadData();
+
+        function toggleCheckbox(id) {
+            const checkbox = document.getElementById(id);
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                checkbox.parentElement.classList.add('selected');
+            } else {
+                checkbox.parentElement.classList.remove('selected');
+            }
+        }
+
+        document.getElementById('foodForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const contributions = Array.from(document.querySelectorAll('input[name="contributions"]:checked'))
+                .map(cb => cb.value);
+
+            const notes = document.getElementById('additionalNotes').value;
+
+            const userData = {
+                name: currentUser,
+                contributions: contributions,
+                notes: notes
+            };
+
+            foodPreferences[userKey] = userData;
+            await saveData();
+
+            // Show success message
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

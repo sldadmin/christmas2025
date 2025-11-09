@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Date Picker</title>
+    <script src="config.js"></script>
+    <script src="github-sync.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            margin: 10px auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .user-info {
+            text-align: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .user-info .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .calendar {
+            margin-top: 15px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            color: #4a5568;
+            padding: 4px;
+            font-size: 11px;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .day {
+            aspect-ratio: 1 / 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            padding: 4px;
+            overflow: visible;
+        }
+
+        .day.empty {
+            border: none;
+            cursor: default;
+        }
+
+        .day:not(.empty):hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .day.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .day-number {
+            font-size: 18px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        .day.selected .day-number {
+            color: white !important;
+        }
+
+        .day.host-available .day-number {
+            color: white !important;
+        }
+
+        .day-count {
+            font-size: 11px;
+            color: #718096;
+            font-weight: bold;
+        }
+
+        .day.selected .day-count {
+            color: white !important;
+        }
+
+        .day.host-available .day-count {
+            color: white !important;
+        }
+
+        .day.host-available {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .day.host-available .day-number {
+            color: white;
+        }
+
+        .day.host-available .day-count {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .day.host-available:hover {
+            background: #38a169;
+            border-color: #38a169;
+        }
+
+        .day.host-available.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        .day.host-available.selected .day-number {
+            color: white !important;
+        }
+
+        .star-indicator {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .day.host-available .star-indicator {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .star-indicator.filled {
+            color: #FFD700 !important;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .day.selected .star-indicator:not(.filled) {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .day.host-available.selected .star-indicator.filled {
+            color: #FFD700 !important;
+        }
+
+        .current-selection {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .current-selection p {
+            color: #2d3748;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .current-selection strong {
+            color: #667eea;
+        }
+
+        .attendees-list {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .attendees-list h3 {
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .attendee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .attendee-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 13px;
+        }
+
+        .attendee-date {
+            color: #718096;
+            font-size: 11px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .legend {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #48bb78;
+        }
+
+        .back-button {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .back-button:hover {
+            background: #f7fafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎄 Christmas Gathering 2025 🎄</h1>
+        <p class="subtitle">Pick your preferred date to celebrate!</p>
+
+        <div class="user-info">
+            <div class="name" id="userName"></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot"></div>
+                <span>Host available on this date</span>
+            </div>
+        </div>
+
+        <div class="calendar">
+            <div class="calendar-header">December 2025</div>
+            <div class="weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+            <div class="days" id="daysContainer"></div>
+        </div>
+
+        <div class="current-selection" id="currentSelection">
+            <p>Click on dates to select them. Click the ☆ on a date to mark it as your preferred choice.</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalResponses">0</div>
+                <div class="stat-label">Total Responses</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="remainingSlots">14</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+        </div>
+
+        <div class="attendees-list">
+            <h3>Who's Coming? (0/14)</h3>
+            <div id="attendeesList"></div>
+        </div>
+
+        <button class="back-button" onclick="saveAndGoBack()">Back to Menu</button>
+    </div>
+
+    <script>
+        // Configuration - set which days you're available to host
+        const hostAvailableDates = [15, 16, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30]; // Days in December you can host (15-30, minus 22nd and 23rd)
+
+        // December 2025 starts on Monday
+        const daysInDecember = 31;
+
+        const currentUser = localStorage.getItem('selectedUserName');
+
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize GitHub sync
+        const github = new GitHubSync(GITHUB_CONFIG);
+        let selections = {};
+        let currentSha = null;
+
+        document.getElementById('userName').textContent = currentUser;
+
+        // Load data from GitHub
+        async function loadData() {
+            const result = await github.fetchData();
+            selections = result.data.calendarSelections || {};
+            currentSha = result.sha;
+            renderCalendar();
+        }
+
+        // Save data to GitHub
+        async function saveData() {
+            const fullData = {
+                calendarSelections: selections,
+                foodPreferences: (await github.fetchData()).data.foodPreferences || {}
+            };
+            currentSha = await github.saveData(fullData, currentSha);
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+
+            // Start from day 15 (skip first 2 weeks)
+            const startDay = 15;
+
+            // December 15, 2025 is a Monday (day of week = 1)
+            // Add empty cells to align the calendar (15th is on a Monday, so we need 1 empty cell for Sunday)
+            for (let i = 0; i < 1; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day empty';
+                container.appendChild(emptyDay);
+            }
+
+            // Add days from 15 to 31
+            for (let day = startDay; day <= daysInDecember; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'day';
+                dayEl.dataset.day = day;
+
+                // Check if host is available
+                const isAvailable = hostAvailableDates.includes(day);
+
+                // Mark unavailable days (22, 23, 31)
+                const isUnavailable = [22, 23, 31].includes(day);
+
+                if (isAvailable) {
+                    dayEl.classList.add('host-available');
+                } else if (isUnavailable) {
+                    dayEl.style.opacity = '0.3';
+                    dayEl.style.cursor = 'not-allowed';
+                }
+
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayEl.appendChild(dayNumber);
+
+                // Add star outline to all available days
+                if (isAvailable) {
+                    const star = document.createElement('div');
+                    star.className = 'star-indicator';
+                    star.textContent = '☆';
+                    star.title = 'Click to mark as preferred';
+                    star.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectPreferredDate(day);
+                    });
+                    dayEl.appendChild(star);
+                }
+
+                // Count selections for this day
+                const count = Object.values(selections).filter(s => s.dates && s.dates.includes(day)).length;
+                if (count > 0) {
+                    const countEl = document.createElement('div');
+                    countEl.className = 'day-count';
+                    countEl.textContent = count;
+                    countEl.style.position = 'absolute';
+                    countEl.style.bottom = '4px';
+                    countEl.style.fontSize = '11px';
+                    countEl.style.fontWeight = 'bold';
+                    dayEl.appendChild(countEl);
+                }
+
+                // Only add click handler for available days
+                if (isAvailable) {
+                    dayEl.addEventListener('click', () => selectDate(day));
+                }
+
+                container.appendChild(dayEl);
+            }
+
+            updateUI();
+        }
+
+        async function selectDate(day) {
+            // Prevent selection of unavailable days
+            const unavailableDays = [22, 23, 31];
+            if (unavailableDays.includes(day)) {
+                return;
+            }
+
+            const userKey = currentUser.toLowerCase();
+
+            // Initialize user's selection if it doesn't exist
+            if (!selections[userKey]) {
+                selections[userKey] = {
+                    name: currentUser,
+                    dates: [],
+                    preferred: null
+                };
+            }
+
+            // Toggle date selection
+            if (selections[userKey].dates.includes(day)) {
+                // Remove date if already selected
+                selections[userKey].dates = selections[userKey].dates.filter(d => d !== day);
+
+                // If removing the preferred date, clear it
+                if (selections[userKey].preferred === day) {
+                    selections[userKey].preferred = null;
+                }
+
+                // Remove user entirely if no dates selected
+                if (selections[userKey].dates.length === 0) {
+                    delete selections[userKey];
+                }
+            } else {
+                // Add date to selection
+                selections[userKey].dates.push(day);
+                selections[userKey].dates.sort((a, b) => a - b);
+            }
+
+            await saveData();
+            renderCalendar();
+        }
+
+        async function selectPreferredDate(day) {
+            // Prevent selection of unavailable days
+            const unavailableDays = [22, 23, 31];
+            if (unavailableDays.includes(day)) {
+                return;
+            }
+
+            const userKey = currentUser.toLowerCase();
+
+            // Initialize user's selection if it doesn't exist
+            if (!selections[userKey]) {
+                selections[userKey] = {
+                    name: currentUser,
+                    dates: [],
+                    preferred: null
+                };
+            }
+
+            // If clicking the same preferred star, toggle it off
+            if (selections[userKey].preferred === day) {
+                selections[userKey].preferred = null;
+            } else {
+                // Set as preferred
+                selections[userKey].preferred = day;
+
+                // Also add to dates if not already there
+                if (!selections[userKey].dates.includes(day)) {
+                    selections[userKey].dates.push(day);
+                    selections[userKey].dates.sort((a, b) => a - b);
+                }
+            }
+
+            // Remove user entirely if no dates selected
+            if (selections[userKey].dates.length === 0) {
+                delete selections[userKey];
+            }
+
+            await saveData();
+            renderCalendar();
+        }
+
+        function updateUI() {
+            const userKey = currentUser.toLowerCase();
+            const currentSelection = document.getElementById('currentSelection');
+
+            // Update selected days and stars for current user
+            document.querySelectorAll('.day').forEach(day => {
+                day.classList.remove('selected');
+
+                const dayNum = parseInt(day.dataset.day);
+                const star = day.querySelector('.star-indicator');
+
+                if (selections[userKey]) {
+                    const userSelection = selections[userKey];
+
+                    // Highlight selected days
+                    if (userSelection.dates && userSelection.dates.includes(dayNum)) {
+                        day.classList.add('selected');
+                    }
+
+                    // Update star appearance
+                    if (star) {
+                        if (userSelection.preferred === dayNum) {
+                            star.textContent = '★';
+                            star.classList.add('filled');
+                            star.title = 'Your preferred date (click to unmark)';
+                        } else {
+                            star.textContent = '☆';
+                            star.classList.remove('filled');
+                            star.title = 'Click to mark as preferred';
+                        }
+                    }
+                } else if (star) {
+                    // Reset stars for users not logged in
+                    star.textContent = '☆';
+                    star.classList.remove('filled');
+                    star.title = 'Click to mark as preferred';
+                }
+            });
+
+            // Update current selection message
+            if (selections[userKey] && selections[userKey].dates && selections[userKey].dates.length > 0) {
+                const dates = selections[userKey].dates;
+                const preferred = selections[userKey].preferred;
+
+                if (dates.length === 1) {
+                    const hasPreferred = preferred === dates[0];
+                    currentSelection.innerHTML = `
+                        <p>You selected: <strong>December ${dates[0]}, 2025</strong> ${hasPreferred ? '⭐' : ''}</p>
+                        <p style="margin-top: 8px; font-size: 13px; color: #718096;">Click other dates to add more options. Click the ☆ to mark as preferred.</p>
+                    `;
+                } else {
+                    const dateList = dates.map(d => {
+                        if (d === preferred) {
+                            return `<strong>Dec ${d} ⭐</strong>`;
+                        }
+                        return `Dec ${d}`;
+                    }).join(', ');
+                    currentSelection.innerHTML = `
+                        <p>You selected: ${dateList}</p>
+                        <p style="margin-top: 8px; font-size: 13px; color: #718096;">⭐ marks your preferred date. Click dates to add/remove, click ☆ to set preferred.</p>
+                    `;
+                }
+            } else {
+                currentSelection.innerHTML = '<p>Click on dates to select them. Click the ☆ on a date to mark it as your preferred choice.</p>';
+            }
+
+            // Update stats
+            const totalResponses = Object.keys(selections).length;
+            document.getElementById('totalResponses').textContent = totalResponses;
+            document.getElementById('remainingSlots').textContent = 14 - totalResponses;
+
+            // Update attendees list
+            const attendeesList = document.getElementById('attendeesList');
+            const attendeesArray = Object.values(selections);
+
+            document.querySelector('.attendees-list h3').textContent =
+                `Who's Coming? (${totalResponses}/14)`;
+
+            if (attendeesArray.length === 0) {
+                attendeesList.innerHTML = '<p style="text-align: center; color: #718096; padding: 20px;">No responses yet. Be the first to pick a date!</p>';
+            } else {
+                attendeesList.innerHTML = attendeesArray.map(attendee => {
+                    const dateList = attendee.dates.map(d => {
+                        if (d === attendee.preferred) {
+                            return `Dec ${d} ⭐`;
+                        }
+                        return `Dec ${d}`;
+                    }).join(', ');
+                    return `
+                        <div class="attendee-item">
+                            <span class="attendee-name">${attendee.name}</span>
+                            <span class="attendee-date">${dateList}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function saveAndGoBack() {
+            // Data is already saved in localStorage
+            window.location.href = 'menu.html';
+        }
+
+        // Initial load from GitHub
+        loadData();
+    </script>
+</body>
+</html>
