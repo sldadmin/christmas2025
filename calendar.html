@@ -645,9 +645,9 @@
                 } else {
                     const dateList = dates.map(d => {
                         if (d === preferred) {
-                            return `<strong>Dec ${d} ⭐</strong>`;
+                            return `<strong>${d} ⭐</strong>`;
                         }
-                        return `Dec ${d}`;
+                        return `${d}`;
                     }).join(', ');
                     currentSelection.innerHTML = `
                         <p>You selected: ${dateList}</p>
@@ -676,9 +676,9 @@
                 attendeesList.innerHTML = attendeesArray.map(attendee => {
                     const dateList = attendee.dates.map(d => {
                         if (d === attendee.preferred) {
-                            return `Dec ${d} ⭐`;
+                            return `${d} ⭐`;
                         }
-                        return `Dec ${d}`;
+                        return `${d}`;
                     }).join(', ');
                     return `
                         <div class="attendee-item">
