@@ -5,15 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Christmas Date Picker</title>
     <script>
-        // GitHub Configuration - embedded for GitHub Pages deployment
-        const GITHUB_CONFIG = {
-            owner: 'sldadmin',
-            repo: 'christmas2025',
-            branch: 'main',
-            token: atob('Z2hwX1lBZ21QTTVRQXdFbTA4N0pmUjE2Mkg4S1hyN2tqUDJOcjZhMA==')
-        };
+        // Firebase Configuration
+        const FIREBASE_URL = 'https://christmas2025-1e713-default-rtdb.firebaseio.com';
     </script>
-    <script src="github-sync.js"></script>
+    <script src="firebase-sync.js"></script>
     <style>
         * {
             margin: 0;
@@ -417,28 +412,22 @@
             window.location.href = 'index.html';
         }
 
-        // Initialize GitHub sync
-        const github = new GitHubSync(GITHUB_CONFIG);
+        // Initialize Firebase sync
+        const firebase = new FirebaseSync(FIREBASE_URL);
         let selections = {};
-        let currentSha = null;
 
         document.getElementById('userName').textContent = currentUser;
 
-        // Load data from GitHub
+        // Load data from Firebase
         async function loadData() {
-            const result = await github.fetchData();
-            selections = result.data.calendarSelections || {};
-            currentSha = result.sha;
+            const data = await firebase.fetchData();
+            selections = data.calendarSelections || {};
             renderCalendar();
         }
 
-        // Save data to GitHub
+        // Save data to Firebase
         async function saveData() {
-            const fullData = {
-                calendarSelections: selections,
-                foodPreferences: (await github.fetchData()).data.foodPreferences || {}
-            };
-            currentSha = await github.saveData(fullData, currentSha);
+            await firebase.saveCalendarSelections(selections);
         }
 
         function renderCalendar() {
@@ -703,7 +692,7 @@
             window.location.href = 'menu.html';
         }
 
-        // Initial load from GitHub
+        // Initial load from Firebase
         loadData();
     </script>
 </body>
