@@ -92,8 +92,12 @@
         }
 
         .checkbox-item.selected {
-            background: #e6f2ff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-color: #667eea;
+        }
+
+        .checkbox-item.selected label {
+            color: white;
         }
 
         .checkbox-item input[type="checkbox"] {
@@ -188,6 +192,65 @@
         .success-message.show {
             display: block;
         }
+
+        .guest-summary {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .guest-summary h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .guest-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .guest-card .guest-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .guest-card .contributions-list {
+            margin-bottom: 10px;
+        }
+
+        .guest-card .contribution-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .guest-card .notes {
+            color: #4a5568;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #718096;
+            padding: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -240,6 +303,11 @@
                 <button type="button" class="back-button" onclick="window.location.href='menu.html'">Back to Menu</button>
             </div>
         </form>
+
+        <div class="guest-summary">
+            <h2>What Everyone is Bringing</h2>
+            <div id="guestList"></div>
+        </div>
     </div>
 
     <script>
@@ -282,6 +350,53 @@
                     document.getElementById('additionalNotes').value = prefs.notes;
                 }
             }
+
+            // Display all guests' contributions
+            displayGuestSummary();
+        }
+
+        // Display what all guests are bringing
+        function displayGuestSummary() {
+            const guestListDiv = document.getElementById('guestList');
+            const contributionLabels = {
+                'appetizers': 'Appetizers',
+                'mainDish': 'Main Dish',
+                'sideDish': 'Side Dish',
+                'dessert': 'Dessert',
+                'drinks': 'Drinks/Beverages'
+            };
+
+            if (Object.keys(foodPreferences).length === 0) {
+                guestListDiv.innerHTML = '<div class="no-data">No one has selected items yet</div>';
+                return;
+            }
+
+            let html = '';
+            for (const [key, prefs] of Object.entries(foodPreferences)) {
+                if (prefs.contributions && prefs.contributions.length > 0) {
+                    html += `<div class="guest-card">
+                        <div class="guest-name">${prefs.name}</div>
+                        <div class="contributions-list">`;
+
+                    prefs.contributions.forEach(contrib => {
+                        html += `<span class="contribution-tag">${contributionLabels[contrib] || contrib}</span>`;
+                    });
+
+                    html += `</div>`;
+
+                    if (prefs.notes) {
+                        html += `<div class="notes">"${prefs.notes}"</div>`;
+                    }
+
+                    html += `</div>`;
+                }
+            }
+
+            if (html === '') {
+                guestListDiv.innerHTML = '<div class="no-data">No one has selected items yet</div>';
+            } else {
+                guestListDiv.innerHTML = html;
+            }
         }
 
         // Save data to GitHub
@@ -323,6 +438,9 @@
 
             foodPreferences[userKey] = userData;
             await saveData();
+
+            // Refresh guest summary
+            displayGuestSummary();
 
             // Show success message
             const successMsg = document.getElementById('successMessage');
